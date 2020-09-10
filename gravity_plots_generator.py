@@ -19,7 +19,7 @@
 # instead of opening a new window for each figure. More about that later. 
 # If you are using an old version of IPython, try using '%pylab inline' instead.
 
-get_ipython().run_line_magic('matplotlib', 'inline')
+#get_ipython().run_line_magic('matplotlib', 'inline')
 
 
 # First thing is importing all required modules
@@ -159,6 +159,7 @@ class InputStar():
         cal_B = ql3.loadGravi(inputpath_B + cal_filename_B, insname='GRAVITY_SC')
 
         
+
         #If Object HD 141926 (E) change AT variable names to UT variable names
         if source == 'HD141926':
             res_A = auxiliary_telescope_names_to_UT(res_A)
@@ -298,6 +299,16 @@ class InputStar():
 #                       'U3U1':(oifits_A.oi_vis_sc_visphierr[4]+oifits_B.oi_vis_sc_visphierr[4])/2,
 #                       'U2U1':(oifits_A.oi_vis_sc_visphierr[5]+oifits_B.oi_vis_sc_visphierr[5])/2 }
         
+        ##Get baselines values B/lambda 
+        baseline_A = {}
+        baseline_B = {}
+        self.baseline = {}
+        for  key, value in self.uV2_A.items():
+            baseline_A[key] = sqrt(self.uV2_A[key]**2 + self.vV2_A[key]**2)
+            baseline_B[key] = sqrt(self.uV2_B[key]**2 + self.vV2_B[key]**2)
+            self.baseline[key] = mean([baseline_A[key],baseline_B[key]])
+        
+
 
 #-------------------------------------------------------------------------
     def figure_flux_preprocessing(self, plot_figure=False, save_figure=False):
@@ -1120,12 +1131,16 @@ We use the averaged the flux of both observations in all telescope units to get 
         index_higher_continuum_range  = min(range(len(self.wl_A)), key=lambda i: abs(self.wl_A[i]-continuum_range[1]))
         
         self.continuum_diff_phase = {}
+        self.continuum_diff_phase_error = {}
         
         for key, value in self.diff_phase.items():
             diff_phase_removed_nan = [x for x in value if ~np.isnan(x)]
-            # WARNING!!: If nan values in V2 are not removed, the statistics.median() is NOT correct.
+            # WARNING!!: If nan values in diff_phase are not removed, the statistics.median() is NOT correct.
             self.continuum_diff_phase[key] = statistics.median(diff_phase_removed_nan[index_lower_continuum_range:index_higher_continuum_range])
         
+            #continuum_diff_phase error is given as its standard deviation
+            self.continuum_diff_phase_error[key] =np.std(diff_phase_removed_nan[index_lower_continuum_range:index_higher_continuum_range])
+
             # IF number of nan in self.diff_phase is > 5% --> Raise WARNING
             if (len(self.diff_phase)-len(diff_phase_removed_nan))/len(self.diff_phase)>0.05:
                 print('')
@@ -1192,7 +1207,7 @@ We use the averaged the flux of both observations in all telescope units to get 
                 ax[i,j].axvline(continuum_range[1], color="grey", lw=1, ls='--')
                 ax[i,j].set_ylim(ylim)
                 ax[i,j].set_xlim(xlim) 
-                ax[i,j].set_ylabel('$\phi$')
+                #ax[i,j].set_ylabel('$\phi (^\circ)$',fontsize=12)
 
 
 
@@ -1418,8 +1433,7 @@ We use the averaged the flux of both observations in all telescope units to get 
         # inset
         inset_ax = fig.add_axes([0.56, 0.6, 0.4, 0.35]) # X, Y, width, height
         
-        
-        # Calculate median value on the zoomed interval
+        # Identify the index corresponding to the zoomed interval
         index_zoom_lower_xlim = min(range(len(self.wl_A)), key=lambda i: abs(self.wl_A[i]-zoom_lower_xlim))
         index_zoom_higher_xlim  = min(range(len(self.wl_A)), key=lambda i: abs(self.wl_A[i]-zoom_higher_xlim))
         
@@ -1458,16 +1472,6 @@ We use the averaged the flux of both observations in all telescope units to get 
         In this function is represented V² as a function of the spatial frecuency 𝐵/𝜆 [𝑚/𝜇𝑚] given in [rad] units.
         
         """
-
-        ##Get baselines values B/lambda 
-        baseline_A = {}
-        baseline_B = {}
-        baseline = {}
-        for  key, value in self.uV2_A.items():
-            baseline_A[key] = sqrt(self.uV2_A[key]**2 + self.vV2_A[key]**2)
-            baseline_B[key] = sqrt(self.uV2_B[key]**2 + self.vV2_B[key]**2)
-            baseline[key] = mean([baseline_A[key],baseline_B[key]])
-        
         
         # Read fitting data from automeris .csv file  
         # (in the LITpro_output directory)  
@@ -1502,7 +1506,7 @@ We use the averaged the flux of both observations in all telescope units to get 
         i=0
         for  key, value in self.visibility2.items():
             #Generate interpolated model fitting values
-            ax.errorbar(baseline[key]*1000000/self.Brg, self.continuum_visibility2[key], yerr=self.continuum_visibility2_error[key], c='black',fmt='o', capthick=2, label='$V^2$ continuum data' if i == 0 else "")
+            ax.errorbar(self.baseline[key]*1000000/self.Brg, self.continuum_visibility2[key], yerr=self.continuum_visibility2_error[key], c='black',fmt='o', capthick=2, label='$V^2$ continuum data' if i == 0 else "")
             
             if i == 0:
                 ax.plot(wave_cont,modelValue_cont, '--', color='black',label='Fit to $V^2$ continuum model')
@@ -1608,6 +1612,32 @@ We use the averaged the flux of both observations in all telescope units to get 
 
 
 
+#-------------------------------------------------------------------------
+    def figure_diff_phase_vs_spatial_frecuency(self, plot_figure=False, save_figure=False):
+        """
+        Figure showing the variation of the mean value of the differential phase
+        in the continuum around Brg.
+        """
+
+        fig, ax = plt.subplots()
+           
+        for  key, value in self.continuum_diff_phase.items():
+                      
+             # Plot subplots
+            ax.axes.errorbar(self.baseline[key]*1000000/self.Brg, self.continuum_diff_phase[key],yerr= self.continuum_diff_phase_error[key] , fmt='r*-',label='Mean (A,B)')
+            ax.set_title(self.source + ' Continuum differential phase')
+            ax.set_ylabel('$\phi (^\circ)$',fontsize=12)
+            ax.set_xlabel('$B/\lambda \: (rad^{-1}$)',fontsize=12)
+        
+        #Save figure
+        if save_figure:
+            #Save figure to disk
+            fig.savefig('./figures/'+str(self.source) + "_diff_phase_vs_spatial_frecuency" + ".png")#, dpi=300)
+
+        #Close figure if plot_figure=False
+        if plot_figure==False:
+            plt.close(fig)    # close the figure window
+            
 #-------------------------------------------------------------------------
 
 #-------------------------------------------------------------------------
