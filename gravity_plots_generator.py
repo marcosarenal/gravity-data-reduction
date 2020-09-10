@@ -166,6 +166,7 @@ class InputStar():
             cal_A = auxiliary_telescope_names_to_UT(cal_A)
             cal_B = auxiliary_telescope_names_to_UT(cal_B)
 
+
         
 #        # Import data from files with gravi_visual_class
 #        #------------------------------------------------
@@ -1132,7 +1133,8 @@ We use the averaged the flux of both observations in all telescope units to get 
                 print('Results might be inconsistent!')
                 print('')
         
-        print('Estimation of continuum_diff_phase:',self.continuum_diff_phase)
+        print(self.source, 'Estimation of continuum_diff_phase:',self.continuum_diff_phase,'+-', self.continuum_diff_phase_error)
+        print('')
  
 
 
