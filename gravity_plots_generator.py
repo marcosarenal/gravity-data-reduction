@@ -1640,6 +1640,105 @@ We use the averaged the flux of both observations in all telescope units to get 
             
 #-------------------------------------------------------------------------
 
+    def figure_line_visibility2_calculation(self, line_range = [2.164,2.167], plot_range = [2.16,2.17], 
+                                            plot_figure=False, save_figure=False):
+        """
+        This function calculates the mean squared visibility in a given wavelength range (line_range) for the line.
+        It also calculates its error as the standard deviation of that value in the range.
+        It is also plotted the squared visibility in a different given wavelength range (plot_range). 
+        
+        Input:
+        -line_range = wavelength range for the calculation of the line squared visibility
+        -plot_range = wavelength range for the x-axis plot
+        
+        Output:
+        -line_visibility2 = dict with the mean squared visibility of the line for each baseline. 
+        -line_visibility2_error = dict with the  squared visibility error of the line for each baseline. 
+        
+        """
+        
+        #Calculate index values for the lower and higher crop range
+        index_lower_plot_range = min(range(len(self.wl_A)), key=lambda i: abs(self.wl_A[i]-plot_range[0]))
+        index_higher_plot_range = min(range(len(self.wl_A)), key=lambda i: abs(self.wl_A[i]-plot_range[1]))       
+            
+        #crop wavelength    
+        cropped_wl = self.wl_A[index_lower_plot_range:index_higher_plot_range]
+            
+        #Crop the plot range 
+        cropped_visibility2 = {}
+        for key, value in self.visibility2.items():
+            cropped_visibility2[key] = self.visibility2[key][index_lower_plot_range:index_higher_plot_range]
+            
+        #Calculate index values for the lower and higher line range
+        index_lower_line_range  = min(range(len(cropped_wl)), key=lambda i: abs(cropped_wl[i]-line_range[0]))
+        index_higher_line_range = min(range(len(cropped_wl)), key=lambda i: abs(cropped_wl[i]-line_range[1]))       
+        
+        #Calculate the line_visibility2 as the mean value in the cropped line range
+        self.line_visibility2 = {}
+        self.line_visibility2_error = {}
+                    
+        print('Star: {0}'.format(str(self.source)))
+
+        for key, value in self.visibility2.items():
+            self.line_visibility2[key] = np.mean(cropped_visibility2[key][index_lower_line_range:index_higher_line_range])    
+            self.line_visibility2_error[key] = np.std(cropped_visibility2[key])    
+            print(' Key:{0:<4} | mean line visibility = {1:<20}+-{2} '.format(str(key),self.line_visibility2[key],self.line_visibility2_error[key]))
+        print('')
+        fig, ax = plt.subplots(3,2, figsize=(12, 14))
+        
+        # Plot subplots
+        ax[0,0].plot(cropped_wl, cropped_visibility2['U2U1'], color="b",label='Line visibility2')
+        ax[0,0].legend(loc=2) # upper left corner
+        ax[0,0].set_title(self.source +' V2[U2U1]')
+        ax[0,0].set_ylabel('$V^2$')
+        
+        ax[0,1].plot(cropped_wl, cropped_visibility2['U3U1'], color="b",label='Line visibility2')
+        ax[0,1].legend(loc=2) # upper left corner
+        ax[0,1].set_title(self.source +' V2[U3U1]')
+        
+        ax[1,0].plot(cropped_wl, cropped_visibility2['U3U2'], color="b",label='Line visibility2')
+        ax[1,0].legend(loc=2) # upper left corner
+        ax[1,0].set_title(self.source +' V2[U3U2]')
+        ax[1,0].set_ylabel('$V^2$')
+        
+        ax[1,1].plot(cropped_wl, cropped_visibility2['U4U1'], color="b",label='Line visibility2')
+        ax[1,1].legend(loc=2) # upper left corner
+        ax[1,1].set_title(self.source +' V2[U4U1]')
+        
+        ax[2,0].plot(cropped_wl, cropped_visibility2['U4U2'], color="b",label='Line visibility2')
+        ax[2,0].legend(loc=2) # upper left corner
+        ax[2,0].set_title(self.source +' V2[U4U2]')
+        ax[2,0].set_xlabel('Wavelength ($\mu m$)')
+        ax[2,0].set_ylabel('$V^2$')
+        
+        ax[2,1].plot(cropped_wl, cropped_visibility2['U4U3'], color="b",label='Line visibility2')
+        ax[2,1].legend(loc=2) # upper left corner
+        ax[2,1].set_title(self.source +' V2[U4U3]')
+        ax[2,1].set_xlabel('Wavelength ($\mu m$)')
+        
+         
+        #For each subplot
+        for i in range(len(ax)):
+            for j in range(len(ax[i])):
+                ax[i,j].set_xlim(plot_range) 
+                ax[i,j].axvline(self.Brg, color="green", lw=1, ls='--')
+                ax[i,j].axvline(line_range[0], color="grey", lw=1, ls='-')
+                ax[i,j].axvline(line_range[1], color="grey", lw=1, ls='-')
+                #ax[i,j].set_ylim(ylim)
+        
+       
+
+        #Save figure
+        if save_figure:
+            #Save figure to disk
+            fig.savefig('./figures/'+str(self.source) + "_line_visibility2" + ".eps", dpi=300)
+
+        #Close figure if plot_figure=False
+        if plot_figure==False:
+            plt.close(fig)    # close the figure window
+            
+#-------------------------------------------------------------------------
+
 #-------------------------------------------------------------------------
 #    def figure_flux_preprocessing(self, plot_figure=False, save_figure=False):
 #        """
