@@ -1,0 +1,21 @@
+Object;Simbad_Name;FWHM(mas);FWHM_error;log_L;log_L+error;log_L-error;magnetospheric;distance_pc
+HD158643;* c Oph;6.18;0.14;2.22;0.26;0.07;magnetospheric;123
+HD100546;HD 100546;5.02;0.12;1.37;0.07;0.05;magnetospheric;110
+HD114981;HD 114981;12.1;0.5;3.24;0.12;0.09;magnetospheric;705
+HD139614;HD 139614;9.57;0.43;0.77;0.03;0.01;magnetospheric;135
+HD142527;HD 142527;2.52;0.06;0.96;0.03;0.01;magnetospheric;157
+HD142666;HD 142666;1.45;0.26;0.94;0.04;0.05;magnetospheric;148
+HD144432;HD 144432;2.76;0.07;0.97;0.04;0.01;magnetospheric;155
+HD145718;HD 145718;9.14;0.66;0.90;0.05;0.04;magnetospheric;153
+HD150193;HD 150193;5.26;0.12;1.37;0.04;0.04;magnetospheric;151
+HD163296;HD 163296;5.9;0.14;1.20;0.06;0.03;magnetospheric;102
+HD179218;HD 179218;17;2.1;2.05;0.09;0.14;magnetospheric;266
+HD190073;HD 190073;4.08;0.1;2.90;0.16;0.20;magnetospheric;871
+HD58647;HD 58647;3.99;0.09;2.44;0.11;0.09;magnetospheric;319
+HD85567;HD 85567;1.17;0.02;3.19;0.10;0.08;non-magnetospheric;1023
+HD95881;HD 95881;2.89;0.2;2.85;0.10;0.07;magnetospheric;1168
+HD97048;HD 97048;4.38;0.1;1.54;0.07;0.60;magnetospheric;185
+HD98922;HD 98922;4.69;0.11;3.03;0.06;0.05;magnetospheric;689
+PDS27;SS 103;1.66;0.07;4.15;0.37;0.39;magnetospheric;2550
+V1818Ori;V* V1818 Ori;2.7;0.7;2.96;0.24;0.29;magnetospheric;695
+HD144668;V* V856 Sco;4.08;0.1;1.72;0.05;0.04;magnetospheric;161
