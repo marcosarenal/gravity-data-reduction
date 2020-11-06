@@ -243,6 +243,36 @@ def angular_size_calculator(distance, disk_size):
    
     return angular_size 
 
+# ====================================================================================
+# 
+def calculate_max_angular_resolution_mas(baseline,wavelength=2.1667):  
+    """
+    This function calculates the maximum angular resolution of an observation at a given wavelegth (\lambda) based on its maximum projected baseline (B) as $\lambda$/2B.
+        
+    When the observed source is unresolved, its size can be given as an upper limit for certain emitting wavelength.
+    This upper limit is given by $\lambda$/2B.
+    
+    The function is called as:
+    
+    *max_angular_resolution(baseline,wavelength)*
+    
+    
+    INPUT:
+    - baseline: largest projected baseline [meters] 
+    - wavelength ($\lambda$): Wavelength of the emitting region whose size is calculated [Default value Br$\gamma$ = 2.1667 $\mu$m]
+        
+    OUTPUT:
+    - max_angular_resolution_mas: maximum angular resolution [mas].
+    
+    """
+
+    #Calculate maximum angular resolution in radians (wavelength is given in microns)
+    max_angular_resolution = (wavelength/1000000)/(2*baseline) # in radians
+    
+    #Transform to mas 
+    max_angular_resolution_mas = max_angular_resolution * (180/np.pi) *3600 *1000 
+    
+    return max_angular_resolution_mas
 
 # ====================================================================================
 #     
