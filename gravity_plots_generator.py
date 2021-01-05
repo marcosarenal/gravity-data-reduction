@@ -55,7 +55,7 @@ import gravi_visual_class
 
 
 class InputStar():
-    def __init__(self, source='V590Mon',name=None):
+    def __init__(self, source='V590Mon',wl_central_line='Brg',name=None):
         self.set_fits_files(source)
         self.source = source
 
@@ -69,6 +69,13 @@ class InputStar():
         self.NaI = 2.206
         self.NIII = 2.249
         self.COb = 2.37
+        
+        if wl_central_line=='COb':
+            self.wl_central_line = self.COb 
+            
+        else:
+            self.wl_central_line = self.Brg #  <---------------------------- GIVEN SPECTRAL LINE
+
 
 #-------------------------------------------------------------------------        
     # ## Retrieving input *.fits* files
@@ -464,7 +471,7 @@ class InputStar():
 
         It is created a bad pixel map where every wavelength channel has a value of 1 if it is correct and 0 if it is associated to a bad pixel.
 
-        It is applied rejection_criterium_flux to establish whether a difference between to datasets can be considered a bad pixel or not. We apply this criterium to fluxes and visibilities to cross-calibrate the rejection criterium.
+        It is set the rejection_criterium_flux variable with the fraction to establish whether a difference between to datasets can be considered a bad pixel or not. We apply this criterium to fluxes and visibilities to cross-calibrate the rejection criterium.
 
         The general_rejection_criterium is applied to the final bad_pixel_mask to take in account both fluxes and visibilities rejection criteria as a whole.
 
@@ -748,9 +755,9 @@ class InputStar():
         for i in range(len(ax)):
             for j in range(len(ax[i])):
                 ax[i,j].set_xlim(xlim) 
-                ax[i,j].axvline(self.Brg, color="green", lw=1, ls='--')
+                ax[i,j].axvline(self.wl_central_line, color="green", lw=1, ls='--')
                 ax[i,j].set_ylim(ylim)
-                #ax[i,j].text(wl_central_line,1.2,round(wl_central_line,3), color="green")
+                #ax[i,j].text(self.wl_central_line,1.2,round(self.wl_central_line,3), color="green")
         
         #Ensure no overlapping in plots
         fig.tight_layout()
@@ -925,9 +932,6 @@ We use the averaged the flux of both observations in all telescope units to get 
         The continuum around our line of interest (𝐵𝑟𝛾) is measured in the flux data (after Bad-pixel removal) divided by the normalized calibration flux (Bad-pixel removed). The following figure shows the wavelength range where the continuum is measured.
         """
 
-        #Set wavelength cetral line and margin for limits in x axis
-        wl_central_line = self.Brg   #  <------------------------------------------------ GIVE SPECTRAL LINE
-        
         
         #Calculate median value of flux in continuum_range over the normalized spectra   
         # at the left of the line
@@ -977,12 +981,11 @@ We use the averaged the flux of both observations in all telescope units to get 
         #Plot figure
         fig, axes = plt.subplots(figsize=(16, 6))
     
+        axes.plot(self.wl_A, self.final_line_flux_normalized, 'b', label='Continuum flux not divided by calibrator')        
         axes.plot(self.wl_A, self.final_continuum_flux_normalized, 'r', label='Continuum flux divided by calibrator')
-        axes.plot(self.wl_A, self.final_line_flux_normalized, 'b', label='Continuum flux not divided by calibrator')
         
         axes.legend(loc='best') 
-            
-        axes.axvline(wl_central_line, color="green", lw=1, ls='-')
+        axes.axvline(self.wl_central_line, color="green", lw=1, ls='-')
         axes.axvline(continuum_range[0], color="grey", lw=1, ls='--')
         axes.axvline(continuum_range[1], color="grey", lw=1, ls='--')
         axes.axvline(continuum_range[2], color="grey", lw=1, ls='--')
@@ -995,7 +998,7 @@ We use the averaged the flux of both observations in all telescope units to get 
         axes.axhline(1, xmin=x_min_left_1, xmax=x_max_right_1, color="r", lw=1, ls='dotted')
 
 
-        #axes.text(wl_central_line,1.2,round(wl_central_line,3), color="green")
+        #axes.text(self.wl_central_line,1.2,round(self.wl_central_line,3), color="green")
         #axes.text(1,1.2,'Line is not divided by calibrator')
          
         x_min_left_2=(continuum_range[2]-xlim[0])/(xlim[1]-xlim[0])
@@ -1090,9 +1093,6 @@ We use the averaged the flux of both observations in all telescope units to get 
         ax[2,1].axhline(self.continuum_visibility2['U4U3'], xmin=x_min_left, xmax=x_max_right, color="grey", lw=1, ls='dotted')
         
         
-        #Set wavelength central line and margin for limits in x axis
-        wl_central_line = self.Brg   #  <------------------------------------------------ GIVE SPECTRAL LINE
-
 
        #For each subplot
         for i in range(len(ax)):
@@ -1100,7 +1100,7 @@ We use the averaged the flux of both observations in all telescope units to get 
                 ax[i,j].set_xlim(xlim) 
                 ax[i,j].set_ylim(ylim)
  
-                ax[i,j].axvline(wl_central_line, color="green", lw=1, ls='-')
+                ax[i,j].axvline(self.wl_central_line, color="green", lw=1, ls='-')
                 ax[i,j].axvline(continuum_range[0], color="grey", lw=1, ls='--')
                 ax[i,j].axvline(continuum_range[1], color="grey", lw=1, ls='--')
                 ax[i,j].set_ylim(ylim)
@@ -1191,10 +1191,6 @@ We use the averaged the flux of both observations in all telescope units to get 
         ax[2,1].set_xlabel('Wavelength ($\mu m$)')
         ax[2,1].axhline(self.continuum_diff_phase['U4U3'], xmin=x_min_left, xmax=x_max_right, color="grey", lw=1, ls='dotted')
         
-        
-        #Set wavelength central line and margin for limits in x axis
-        wl_central_line = self.Brg   #  <------------------------------------------------ GIVE SPECTRAL LINE
-
 
        #For each subplot
         for i in range(len(ax)):
@@ -1202,7 +1198,7 @@ We use the averaged the flux of both observations in all telescope units to get 
                 ax[i,j].set_xlim(xlim) 
                 ax[i,j].set_ylim(ylim)
  
-                ax[i,j].axvline(wl_central_line, color="green", lw=1, ls='-')
+                ax[i,j].axvline(self.wl_central_line, color="green", lw=1, ls='-')
                 ax[i,j].axvline(continuum_range[0], color="grey", lw=1, ls='--')
                 ax[i,j].axvline(continuum_range[1], color="grey", lw=1, ls='--')
                 ax[i,j].set_ylim(ylim)
@@ -1214,7 +1210,7 @@ We use the averaged the flux of both observations in all telescope units to get 
         #Save figure
         if save_figure:
             #Save figure to disk
-            fig.savefig('./figures/'+source + "_figure_diff_phase_continuum_measurement" + ".eps", dpi=300)
+            fig.savefig('./figures/'+str(self.source)+ "_figure_diff_phase_continuum_measurement" + ".eps", dpi=300)
 
         #Close figure if plot_figure=False
         if plot_figure==False:
@@ -1222,6 +1218,91 @@ We use the averaged the flux of both observations in all telescope units to get 
             
 #-------------------------------------------------------------------------
 
+    def figure_closure_phase_continuum_measurement(self, xlim=xlim(), ylim=ylim(),continuum_range=[2.141,2.1604], plot_figure=False, save_figure=False):
+        """
+        The continuum in closure phase (continuum_closure_phase) around our line of interest (𝐵𝑟𝛾) is measured. The following figure shows the wavelength range where the continuum is measured.        
+        """
+
+        #Calculate median value of differential phase in continuum_range         
+        index_lower_continuum_range = min(range(len(self.wl_A)), key=lambda i: abs(self.wl_A[i]-continuum_range[0]))
+        index_higher_continuum_range  = min(range(len(self.wl_A)), key=lambda i: abs(self.wl_A[i]-continuum_range[1]))
+        
+        self.continuum_closure_phase = {}
+        self.continuum_closure_phase_error = {}
+        
+        for key, value in self.phase_closure.items():
+            closure_phase_removed_nan = [x for x in value if ~np.isnan(x)]
+            # WARNING!!: If nan values in phase_closure are not removed, the statistics.median() is NOT correct.
+            self.continuum_closure_phase[key] = statistics.median(closure_phase_removed_nan[index_lower_continuum_range:index_higher_continuum_range])
+        
+            #continuum_closure_phase error is given as its standard deviation
+            self.continuum_closure_phase_error[key] =np.std(closure_phase_removed_nan[index_lower_continuum_range:index_higher_continuum_range])
+
+            # IF number of nan in self.phase_closure is > 5% --> Raise WARNING
+            if (len(self.phase_closure)-len(closure_phase_removed_nan))/len(self.phase_closure)>0.05:
+                print('')
+                print('WARNING!!!!: number of nan in flux is > 5%')
+                print('Results might be inconsistent!')
+                print('')
+        
+        print(self.source, 'Estimation of continuum_closure_phase:',self.continuum_closure_phase,'+-', self.continuum_closure_phase_error)
+        print('')
+ 
+
+
+        fig, ax = plt.subplots(2,2, figsize=(12, 12))
+                
+        # Set plot limits for continuum range measurement
+        x_min_left=(continuum_range[0]-xlim[0])/(xlim[1]-xlim[0])    
+        x_max_right=(continuum_range[1]-xlim[0])/(xlim[1]-xlim[0])
+                
+
+        
+        # Plot subplots
+        ax[0,0].plot(self.wl_A, self.phase_closure['U4U3U2'], color="b",label='Mean (A,B)')
+        ax[0,0].set_title(self.source + ' $\phi[U4U3U2]$')
+        ax[0,0].set_ylabel('$\phi (^\circ)$',fontsize=12)
+        ax[0,0].axhline(self.continuum_closure_phase['U4U3U2'], xmin=x_min_left, xmax=x_max_right, color="grey", lw=1, ls='dotted')
+        
+        ax[0,1].plot(self.wl_A, self.phase_closure['U4U3U1'], color="b",label='Mean (A,B)')
+        ax[0,1].set_title(self.source + ' $\phi[U4U3U1]$')
+        ax[0,1].axhline(self.continuum_closure_phase['U4U3U1'], xmin=x_min_left, xmax=x_max_right, color="grey", lw=1, ls='dotted')
+        
+        ax[1,0].plot(self.wl_A, self.phase_closure['U4U2U1'], color="b",label='Mean (A,B)')
+        ax[1,0].set_title(self.source +' $\phi[U4U2U1]$')
+        ax[1,0].set_ylabel('$\phi (^\circ)$',fontsize=12)
+        ax[1,0].axhline(self.continuum_closure_phase['U4U2U1'], xmin=x_min_left, xmax=x_max_right, color="grey", lw=1, ls='dotted')
+        
+        ax[1,1].plot(self.wl_A, self.phase_closure['U3U2U1'], color="b",label='Mean (A,B)')
+        ax[1,1].set_title(self.source +' $\phi[U3U2U1]$')
+        ax[1,1].axhline(self.continuum_closure_phase['U3U2U1'], xmin=x_min_left, xmax=x_max_right, color="grey", lw=1, ls='dotted')
+        
+
+       #For each subplot
+        for i in range(len(ax)):
+            for j in range(len(ax[i])):
+                ax[i,j].set_xlim(xlim) 
+                ax[i,j].set_ylim(ylim)
+ 
+                ax[i,j].axvline(self.wl_central_line, color="green", lw=1, ls='-')
+                ax[i,j].axvline(continuum_range[0], color="grey", lw=1, ls='--')
+                ax[i,j].axvline(continuum_range[1], color="grey", lw=1, ls='--')
+                ax[i,j].set_ylim(ylim)
+                ax[i,j].set_xlim(xlim) 
+                #ax[i,j].set_ylabel('$\phi (^\circ)$',fontsize=12)
+
+
+
+        #Save figure
+        if save_figure:
+            #Save figure to disk
+            fig.savefig('./figures/'+str(self.source)+ "_figure_closure_phase_continuum_measurement" + ".eps", dpi=300)
+
+        #Close figure if plot_figure=False
+        if plot_figure==False:
+            plt.close(fig)    # close the figure window
+            
+#-------------------------------------------------------------------------
 
     def figure_continuum_corrector(self, xlim=xlim(), ylim=ylim(), plot_figure=False, save_figure=False):
         """
@@ -1302,7 +1383,7 @@ We use the averaged the flux of both observations in all telescope units to get 
         for i in range(len(ax)):
             for j in range(len(ax[i])):
                 ax[i,j].set_xlim(xlim) 
-                ax[i,j].axvline(self.Brg, color="green", lw=1, ls='--')
+                ax[i,j].axvline(self.wl_central_line, color="green", lw=1, ls='--')
                 ax[i,j].set_ylim(ylim)
         
         #Ensure no overlapping in plots
@@ -1325,17 +1406,14 @@ We use the averaged the flux of both observations in all telescope units to get 
         This function presents a specific type of plots where for each baseline is shown its flux, squared visibility and differential phase as a function of wavelength in adjacent subplots for the central wavelength line.
         """
 
-        fig = plt.figure(figsize=(12, 14))
+        fig = plt.figure(figsize=(8, 10))
         
-        
-        #Set wavelength cetral line and margin for limits in x axis
-        wl_central_line = self.Brg   #  <------------------------------------------------ GIVE SPECTRAL LINE
 
         # Object HD 141926 (E) needs to be relabeled with AT telescopes labels
         HD141926_key = ['C1D0','C1B2','C1A0','D0B2','D0A0','B2A0']
         
         # gridspec inside gridspec
-        outer_grid = gridspec.GridSpec(3, 2, wspace=0.2, hspace=0.02)
+        outer_grid = gridspec.GridSpec(3, 2, wspace=0.3, hspace=0.02)
         j=0
         for  key, value in self.visibility2.items():
             inner_grid = gridspec.GridSpecFromSubplotSpec(3, 1,
@@ -1345,31 +1423,39 @@ We use the averaged the flux of both observations in all telescope units to get 
             
             #FLUX
             ax_flux = plt.Subplot(fig, inner_grid[0])
-            ax_flux.plot(self.wl_A, self.final_flux, linestyle="solid", marker="o", markersize=4, color="red")
+            ax_flux.plot(self.wl_A, self.final_flux, linestyle="solid", marker="o", markersize=3, color="red")
             fig.add_subplot(ax_flux)
             ax_flux.set_xlim(xlim)
             ax_flux.set_ylim(flux_ylim)
             ax_flux.set_yticks(flux_yticks)
+            ax_flux.set_xticks([self.wl_central_line])#  <_____________________________________
+            
+            
+            
+            
+            
+            
             #ax_flux.axvspan(wl_max1_Brg, wl_min_Brg, alpha=0.3, color='blue')
             #ax_flux.axvspan(wl_min_Brg, wl_max2_Brg, alpha=0.3, color='red')  
 
             # Object HD 141926 (E) needs to be relabeled with AT telescopes labels
             if self.source == 'HD141926':
-                ax_flux.set_title(self.source+' ['+HD141926_key[j-1]+']',x=0.8,y=0.7, fontsize=12) 
+                ax_flux.set_title('['+HD141926_key[j-1]+']',x=0.8,y=0.7, fontsize=10) 
                 #ax_flux.set_title(self.source+' ['+str(j)+']',x=0.8,y=0.7, fontsize=12) 
 
             else:
-                ax_flux.set_title(self.source+' ['+key+']',x=0.8,y=0.7, fontsize=12) 
+                ax_flux.set_title('['+key+']',x=0.8,y=0.7, fontsize=10) 
             
             #ax_flux.set_xlabel('Wavelength ($\mu m$)',fontsize=12)
             ax_flux.set_ylabel('Flux',fontsize=12)
         
             #VISIBILITY
             ax_visibility = plt.Subplot(fig, inner_grid[1])
-            ax_visibility.plot(self.wl_A, self.visibility2[key],linestyle="solid", marker="o", markersize=4, color="blue")
+            ax_visibility.plot(self.wl_A, self.visibility2[key],linestyle="solid", marker="o", markersize=3, color="blue")
             fig.add_subplot(ax_visibility)
             ax_visibility.set_ylim(visibility_ylim)
             ax_visibility.set_yticks(visibility_yticks)
+            ax_visibility.set_xticks([self.wl_central_line])
             #ax_visibility.axvspan(wl_max1_Brg, wl_min_Brg, alpha=0.3, color='blue')
             #ax_visibility.axvspan(wl_min_Brg, wl_max2_Brg, alpha=0.3, color='red')  
             ax_visibility.set_xlim(xlim)
@@ -1378,11 +1464,12 @@ We use the averaged the flux of both observations in all telescope units to get 
              
             #DIFFERENTIAL PHASE
             ax_diff_phase = plt.Subplot(fig, inner_grid[2])
-            ax_diff_phase.plot(self.wl_A, self.diff_phase[key],linestyle="solid", marker="o", markersize=4, color="green")
+            ax_diff_phase.plot(self.wl_A, self.diff_phase[key],linestyle="solid", marker="o", markersize=3, color="green")
             fig.add_subplot(ax_diff_phase)
             ax_diff_phase.set_xlim(xlim)
             ax_diff_phase.set_ylim(diff_phase_ylim)
             ax_diff_phase.set_yticks(diff_phase_yticks)
+            #ax_diff_phase.set_xticks([2.160, 2.165, 2.170])
             #ax_diff_phase.axvspan(wl_max1_Brg, wl_min_Brg, alpha=0.3, color='blue')
             #ax_diff_phase.axvspan(wl_min_Brg, wl_max2_Brg, alpha=0.3, color='red')  
             ax_diff_phase.set_xlabel('Wavelength ($\mu m$)',fontsize=12)
@@ -1424,8 +1511,8 @@ We use the averaged the flux of both observations in all telescope units to get 
         ax.set_ylabel('Flux',fontsize=14)
         ax.set_xlim(xlim)
         ax.set_ylim(ylim)
-        ax.axvline(self.Brg, color="grey", lw=1, ls='--')
-        ax.text(self.Brg+0.002,1000,'$Br\gamma$', color="grey",fontsize=14)
+        ax.axvline(self.wl_central_line, color="grey", lw=1, ls='--')
+        ax.text(self.wl_central_line+0.002,1000,'$Br\gamma$', color="grey",fontsize=14)
         ax.tick_params(labelsize=14)
        
         fig.tight_layout()
@@ -1443,7 +1530,7 @@ We use the averaged the flux of both observations in all telescope units to get 
         inset_ax.set_title('zoom at $Br\gamma$',fontsize=14)
         #inset_ax.axhline(1, color="green", lw=1, ls='--')
         #inset_ax.set_ylabel('Flux',fontsize=14)
-        inset_ax.axvline(self.Brg, color="grey", lw=1, ls='--')
+        inset_ax.axvline(self.wl_central_line, color="grey", lw=1, ls='--')
 
         # set axis range
         inset_ax.set_xlim(zoom_lower_xlim,zoom_higher_xlim)
@@ -1506,7 +1593,7 @@ We use the averaged the flux of both observations in all telescope units to get 
         i=0
         for  key, value in self.visibility2.items():
             #Generate interpolated model fitting values
-            ax.errorbar(self.baseline[key]*1000000/self.Brg, self.continuum_visibility2[key], yerr=self.continuum_visibility2_error[key], c='black',fmt='o', capthick=2, label='$V^2$ continuum data' if i == 0 else "")
+            ax.errorbar(self.baseline[key]*1000000/self.wl_central_line, self.continuum_visibility2[key], yerr=self.continuum_visibility2_error[key], c='black',fmt='o', capthick=2, label='$V^2$ continuum data' if i == 0 else "")
             
             if i == 0:
                 ax.plot(wave_cont,modelValue_cont, '--', color='black',label='Fit to $V^2$ continuum model')
@@ -1624,7 +1711,7 @@ We use the averaged the flux of both observations in all telescope units to get 
         for  key, value in self.continuum_diff_phase.items():
                       
              # Plot subplots
-            ax.axes.errorbar(self.baseline[key]*1000000/self.Brg, self.continuum_diff_phase[key],yerr= self.continuum_diff_phase_error[key] , fmt='r*-',label='Mean (A,B)')
+            ax.axes.errorbar(self.baseline[key]*1000000/self.wl_central_line, self.continuum_diff_phase[key],yerr= self.continuum_diff_phase_error[key] , fmt='r*-',label='Mean (A,B)')
             ax.set_title(self.source + ' Continuum differential phase')
             ax.set_ylabel('$\phi (^\circ)$',fontsize=12)
             ax.set_xlabel('$B/\lambda \: (rad^{-1}$)',fontsize=12)
@@ -1637,7 +1724,9 @@ We use the averaged the flux of both observations in all telescope units to get 
         #Close figure if plot_figure=False
         if plot_figure==False:
             plt.close(fig)    # close the figure window
+
             
+
 #-------------------------------------------------------------------------
 
     def figure_line_visibility2_calculation(self, line_range = [2.164,2.167], plot_range = [2.16,2.17], 
@@ -1721,7 +1810,7 @@ We use the averaged the flux of both observations in all telescope units to get 
         for i in range(len(ax)):
             for j in range(len(ax[i])):
                 ax[i,j].set_xlim(plot_range) 
-                ax[i,j].axvline(self.Brg, color="green", lw=1, ls='--')
+                ax[i,j].axvline(self.wl_central_line, color="green", lw=1, ls='--')
                 ax[i,j].axvline(line_range[0], color="grey", lw=1, ls='-')
                 ax[i,j].axvline(line_range[1], color="grey", lw=1, ls='-')
                 #ax[i,j].set_ylim(ylim)
@@ -1732,6 +1821,42 @@ We use the averaged the flux of both observations in all telescope units to get 
         if save_figure:
             #Save figure to disk
             fig.savefig('./figures/'+str(self.source) + "_line_visibility2" + ".eps", dpi=300)
+
+        #Close figure if plot_figure=False
+        if plot_figure==False:
+            plt.close(fig)    # close the figure window
+            
+#-------------------------------------------------------------------------
+
+#-------------------------------------------------------------------------
+    def figure_u_v_coverage(self, plot_figure=False, save_figure=False):
+        """
+        Plot u,v coverages for each pair of the observations we have of each source.
+        """
+        fig, ax = plt.subplots(figsize=(8,8))
+
+        #Plot scatter (u,v) coverage
+        for  key, value in self.uV2_A.items():
+            ax.scatter( self.uV2_A[key],self.vV2_A[key],  marker="o", color='blue', facecolor="none", s=100, label='Obs. A' if key == 'U4U3' else "")
+            ax.scatter( self.uV2_B[key],self.vV2_B[key],  marker="o", color='red' , facecolor="none", s=100, label='Obs. B' if key == 'U4U3' else "")
+            ax.scatter(-self.uV2_A[key],-self.vV2_A[key], marker="o", color='blue', facecolor="none", s=100)
+            ax.scatter(-self.uV2_B[key],-self.vV2_B[key], marker="o", color='red' , facecolor="none", s=100)
+        
+            ax.axhline(0, color="black", lw=1, ls='-')
+            ax.axvline(0, color="black", lw=1, ls='-')
+            ax.set_xlabel('u (m)', fontsize = 16)
+            ax.set_ylabel('v (m)', fontsize = 16)
+            ax.set_xlim([-140,140])
+            ax.set_ylim([-140,140])
+            ax.legend(loc=2,fontsize=14) # upper left corner
+            ax.tick_params(labelsize=14)
+        
+        ax.set_title(str(self.source), fontsize=16) 
+
+        #Save figure
+        if save_figure:
+            #Save figure to disk
+            fig.savefig('./figures/'+str(self.source) + "_u_v_coverage" + ".eps", dpi=300)
 
         #Close figure if plot_figure=False
         if plot_figure==False:
