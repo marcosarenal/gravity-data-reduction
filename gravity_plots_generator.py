@@ -862,7 +862,6 @@ We use the averaged the flux of both observations in all telescope units to get 
         
             ax[2].plot(self.cal_wl_A, cal_B_with_nan[index], linewidth=3, label='B_'+index)
             ax[2].plot(self.cal_wl_A, cal_A_with_nan[index], linewidth=3, label='A_'+index)
-        
             #ax[2].plot(cal_wl_A, abs(cal_A_with_nan[index]/cal_B_with_nan[index]), linewidth=3, label='2_'+index)
             
             #Sustitute nan by gaussian convolved kernel
@@ -962,6 +961,7 @@ We use the averaged the flux of both observations in all telescope units to get 
         #SET final continuum flux normalized
         self.final_continuum_flux_normalized = (self.BPcorrected_flux/self.median_BPcorrected_flux)/(self.BPcorrected_calibration_flux/self.median_BPcorrected_calibration_flux)
         
+        
         #SET final line flux normalized
         self.final_line_flux_normalized = (self.BPcorrected_flux/self.median_BPcorrected_flux)
 
@@ -974,6 +974,12 @@ We use the averaged the flux of both observations in all telescope units to get 
         #Final flux to be written to new FITS file
         self.final_flux = self.final_continuum_flux_normalized
         
+        #Calculate standard deviation of the final continuum flux normalized as flux error (before line flux concatenation) 
+        self.final_flux_error = np.concatenate([self.final_flux[self.index_lower_continuum_range_left:index_higher_continuum_range_left],self.final_flux[index_lower_continuum_range_right:self.index_higher_continuum_range_right]])
+
+        self.final_flux_error = np.std(self.final_flux_error)
+        
+        
         #Replace flux in line_range by final_line_flux_normalized
         self.final_flux[index_lower_line_range:index_higher_line_range] = self.final_line_flux_normalized[index_lower_line_range:index_higher_line_range]
 
@@ -983,6 +989,8 @@ We use the averaged the flux of both observations in all telescope units to get 
     
         axes.plot(self.wl_A, self.final_line_flux_normalized, 'b', label='Continuum flux not divided by calibrator')        
         axes.plot(self.wl_A, self.final_continuum_flux_normalized, 'r', label='Continuum flux divided by calibrator')
+        
+        axes.errorbar(2.14, 1.4,yerr = self.final_flux_error, fmt='o', mfc='white', color="red", capsize=2, elinewidth=2, ecolor='red')
         
         axes.legend(loc='best') 
         axes.axvline(self.wl_central_line, color="green", lw=1, ls='-')
@@ -1430,9 +1438,13 @@ We use the averaged the flux of both observations in all telescope units to get 
             ax_flux.set_yticks(flux_yticks)
             ax_flux.set_xticks([self.wl_central_line])#  <_____________________________________
             
-            
-            
-            
+            #ins = ax_flux.inset_axes([0.2,0.2,0.3,0.3])
+            #ins.errorbar(1, 1, yerr = np.std(self.final_flux), color = 'g')
+                        
+            #ax_flux.boxplot(self.final_flux, showfliers=False)
+            #ax_flux.errorbar(2.16, np.mean(flux_ylim)-0.2, yerr = self.final_flux_error, color = 'r', ecolor='g', capthick=6)
+            ax_flux.errorbar(self.wl_A[np.where(self.wl_A>xlim[0])][2], self.final_flux[np.where(self.wl_A>xlim[0])][2],yerr = self.final_flux_error, fmt='.', mfc='white', color="black", capsize=2, elinewidth=2, ecolor='black') 
+
             
             
             #ax_flux.axvspan(wl_max1_Brg, wl_min_Brg, alpha=0.3, color='blue')
@@ -1455,21 +1467,27 @@ We use the averaged the flux of both observations in all telescope units to get 
             fig.add_subplot(ax_visibility)
             ax_visibility.set_ylim(visibility_ylim)
             ax_visibility.set_yticks(visibility_yticks)
-            ax_visibility.set_xticks([self.wl_central_line])
             #ax_visibility.axvspan(wl_max1_Brg, wl_min_Brg, alpha=0.3, color='blue')
             #ax_visibility.axvspan(wl_min_Brg, wl_max2_Brg, alpha=0.3, color='red')  
             ax_visibility.set_xlim(xlim)
             ax_visibility.set_ylabel('$V^2$',fontsize=12)
             #ax_visibility.set_xlabel('Wavelength ($\mu m$)',fontsize=12)
+            
+            #ax_visibility.errorbar(2.16, np.mean(visibility_ylim), yerr = np.std(self.visibility2[key]),  capsize=1, marker='o',elinewidth=1, ecolor='b') #, capthick=36
+            ax_visibility.errorbar(self.wl_A[np.where(self.wl_A>xlim[0])][2], self.visibility2[key][np.where(self.wl_A>xlim[0])][2], yerr = np.std(self.visibility2[key]), fmt='o', mfc='white', color="blue", capsize=2, elinewidth=2, ecolor='blue') 
+            
+            ax_visibility.set_xticks([self.wl_central_line])
              
             #DIFFERENTIAL PHASE
             ax_diff_phase = plt.Subplot(fig, inner_grid[2])
             ax_diff_phase.plot(self.wl_A, self.diff_phase[key],linestyle="solid", marker="o", markersize=3, color="green")
+            ax_diff_phase.errorbar(self.wl_A[np.where(self.wl_A>xlim[0])][2], self.diff_phase[key][np.where(self.wl_A>xlim[0])][2], yerr = np.std(self.diff_phase[key]), fmt='o', mfc='white', color="green", capsize=2, elinewidth=2, ecolor='green') 
+            
             fig.add_subplot(ax_diff_phase)
             ax_diff_phase.set_xlim(xlim)
             ax_diff_phase.set_ylim(diff_phase_ylim)
             ax_diff_phase.set_yticks(diff_phase_yticks)
-            #ax_diff_phase.set_xticks([2.160, 2.165, 2.170])
+            ax_diff_phase.set_xticks([2.160, 2.165, 2.170])
             #ax_diff_phase.axvspan(wl_max1_Brg, wl_min_Brg, alpha=0.3, color='blue')
             #ax_diff_phase.axvspan(wl_min_Brg, wl_max2_Brg, alpha=0.3, color='red')  
             ax_diff_phase.set_xlabel('Wavelength ($\mu m$)',fontsize=12)
