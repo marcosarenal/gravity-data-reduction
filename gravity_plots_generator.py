@@ -527,7 +527,7 @@ class InputStar():
         
         
             # Rejection on visibility criterium
-            if abs(self.v2_A['U4U3'][wl_channel]/self.v2_B['U4U3'][wl_channel]) < rejection_criterium_flux:
+            if abs(self.v2_A['U4U3'][wl_channel]+self.v2_B['U4U3'][wl_channel]) < rejection_criterium_flux:
                 bad_pixel_visibility_U4U3[wl_channel] = 1
             else:
                 bad_pixel_visibility_U4U3[wl_channel] = 0
@@ -1437,17 +1437,9 @@ We use the averaged the flux of both observations in all telescope units to get 
             ax_flux.set_ylim(flux_ylim)
             ax_flux.set_yticks(flux_yticks)
             ax_flux.set_xticks([self.wl_central_line])#  <_____________________________________
-            
-            #ins = ax_flux.inset_axes([0.2,0.2,0.3,0.3])
-            #ins.errorbar(1, 1, yerr = np.std(self.final_flux), color = 'g')
-                        
-            #ax_flux.boxplot(self.final_flux, showfliers=False)
-            #ax_flux.errorbar(2.16, np.mean(flux_ylim)-0.2, yerr = self.final_flux_error, color = 'r', ecolor='g', capthick=6)
-#            ax_flux.errorbar(self.wl_A[np.where(self.wl_A>xlim[0])][2], self.final_flux[np.where(self.wl_A>xlim[0])][2],yerr = self.final_flux_error, fmt='.',  color="black", capsize=2, elinewidth=2, ecolor='black') #mfc='white',
+
             ax_flux.errorbar(self.wl_A[np.where(self.wl_A>xlim[0])][2], flux_yticks[-1],yerr = self.final_flux_error, fmt=',',  color="black", capsize=2, elinewidth=1, ecolor='black') #mfc='white',
 
-            
-            
             
             #ax_flux.axvspan(wl_max1_Brg, wl_min_Brg, alpha=0.3, color='blue')
             #ax_flux.axvspan(wl_min_Brg, wl_max2_Brg, alpha=0.3, color='red')  
@@ -1475,9 +1467,7 @@ We use the averaged the flux of both observations in all telescope units to get 
             ax_visibility.set_ylabel('$V^2$',fontsize=12)
             #ax_visibility.set_xlabel('Wavelength ($\mu m$)',fontsize=12)
             
-            #ax_visibility.errorbar(2.16, np.mean(visibility_ylim), yerr = np.std(self.visibility2[key]),  capsize=1, marker='o',elinewidth=1, ecolor='b') #, capthick=36
             ax_visibility.errorbar(self.wl_A[np.where(self.wl_A>xlim[0])][2], visibility_yticks[-1], yerr = self.continuum_visibility2_error[key], fmt=',', color="black", capsize=2, elinewidth=1, ecolor='black') #mfc='white',
-#            ax_visibility.errorbar(self.wl_A[np.where(self.wl_A>xlim[0])][2], self.visibility2[key][np.where(self.wl_A>xlim[0])][2], yerr = self.continuum_visibility2_error[key], fmt=',', color="black", capsize=2, elinewidth=2, ecolor='black') #mfc='white',
             
             ax_visibility.set_xticks([self.wl_central_line])
              
@@ -1485,7 +1475,7 @@ We use the averaged the flux of both observations in all telescope units to get 
             ax_diff_phase = plt.Subplot(fig, inner_grid[2])
             ax_diff_phase.plot(self.wl_A, self.diff_phase[key],linestyle="solid", marker="o", markersize=3, color="green")
             ax_diff_phase.errorbar(self.wl_A[np.where(self.wl_A>xlim[0])][2], diff_phase_yticks[-1], yerr = self.continuum_diff_phase_error[key], fmt=',',  color="black", capsize=2, elinewidth=1, ecolor='black') #mfc='white',
-#            ax_diff_phase.errorbar(self.wl_A[np.where(self.wl_A>xlim[0])][2], self.diff_phase[key][np.where(self.wl_A>xlim[0])][2], yerr = self.continuum_diff_phase_error[key], fmt=',',  color="black", capsize=2, elinewidth=2, ecolor='black') #mfc='white',
+
             
             fig.add_subplot(ax_diff_phase)
             ax_diff_phase.set_xlim(xlim)
@@ -1499,8 +1489,6 @@ We use the averaged the flux of both observations in all telescope units to get 
         
         
         all_axes = fig.get_axes()
-        
-        
         
         #Ensure no overlapping in plots
         fig.tight_layout()
